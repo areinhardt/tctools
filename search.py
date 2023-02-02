@@ -4,22 +4,22 @@
 import csv, re
 import argparse
 
+searchfields = ["First Name" , "Middle Name", "Last Name", "Email Address", "Member/Customer Number"] # where to search
+printfields = ["First Name", "Last Name", "Email Address", "Member/Customer Number", "Asset End Date"] # what to print
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Locate TCCC member details in OU Analytics data')
+    parser = argparse.ArgumentParser(description='Locate TC member details in OU Analytics data')
     parser.add_argument('-a', '--all', help='show more user details', dest='complete', action='store_true')
     parser.add_argument('oufile', type=argparse.FileType('r', encoding='UTF-16'), help='the CSV file exported from OU Analytics')
     parser.add_argument('query', type=str)
     args = parser.parse_args()
 
     print("-"*60)
-    print("Searching TCCC membership database for '{}'".format(args.query))
+    print("Searching TC membership database for '{}'".format(args.query))
     print("-"*60)
 
-
-    searchfields = ["First Name" , "Middle Name", "Last Name", "Email Address", "Member/Customer Number"] # where to search
     headers = [h.strip() for h in next(args.oufile, None).split("\t")]
 
-    printfields = ["First Name", "Last Name", "Email Address", "Member/Customer Number", "Asset End Date"] # what to print
     if args.complete is not None and args.complete is True:
         printfields = [
 	        "Name Prefix", "First Name", "Middle Name", "Last Name", "Name Suffix", "Gender", 
@@ -30,12 +30,12 @@ if __name__ == "__main__":
 			"Years of Service", 
 	        "Active Society List", "Technical Community List", "Technical Council List", 
     	    "OK to contact"
-#             "Company/Attention", "Address 1", "Address 2", "Address 3", "City", "State/Province", "Postal Code", "Country", "Work Number", "Home Number", 
-# 				"Product Name", "Product Type", "Product Code", 
-# 				"Asset Paid Date", 
-#				"Region", "Section", "Subsection",       
-#               "YP Eligible Y/N", 
-# "HKN Code", "HKN Name", "HKN Induction Date",  
+#            "Company/Attention", "Address 1", "Address 2", "Address 3", "City", "State/Province", "Postal Code", "Country", "Work Number", "Home Number", 
+#            "Product Name", "Product Type", "Product Code", 
+# 			 "Asset Paid Date", 
+#			 "Region", "Section", "Subsection",       
+#            "YP Eligible Y/N", 
+#			 "HKN Code", "HKN Name", "HKN Induction Date",  
         ]
           
 
@@ -45,8 +45,12 @@ if __name__ == "__main__":
             value = line[headers.index(f)].strip()
             if args.query.casefold() in value.casefold():
                 printme = True
+                break
+        
         if printme:
             for f in printfields:
+                if f == "Initial Join Date" and f not in headers:
+                    f = "Intial Join Date" # OU Analytics typo...
                 value = line[headers.index(f)].strip()
 
                 if f == "Technical Community List":
